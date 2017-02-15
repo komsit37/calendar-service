@@ -36,7 +36,7 @@ class CalendarController @Inject()(holidayService: HolidayService)
   }
 
   override val getHolidays = handle(GetHolidays) { args: GetHolidays.Args =>
-    holidayService.getHolidays(args.calendar, Some(parseDate(args.fromDate))).map(_.map(x => toIdl(x)))
+    holidayService.getHolidays(args.calendar, args.fromDate.map(parseDate)).map(_.map(x => toIdl(x)))
   }
 
   override def getPreviousBusinessDay = handle(GetPreviousBusinessDay) { args: GetPreviousBusinessDay.Args => ???}

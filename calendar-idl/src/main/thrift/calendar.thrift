@@ -74,8 +74,8 @@ service CalendarService {
     */
     list<Holiday> getHolidays(
         1: Calendar calendar
-        2: LocalDate fromDate
-        3: LocalDate toDate
+        2: optional LocalDate fromDate
+        3: optional LocalDate toDate
     ) throws (
         1: finatra_thrift_exceptions.ServerError serverError
     )
