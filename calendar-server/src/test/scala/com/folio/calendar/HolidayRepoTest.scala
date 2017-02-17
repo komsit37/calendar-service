@@ -14,7 +14,6 @@ class HolidayRepoTest extends WordSpec with Matchers with BeforeAndAfterEach{
 
 val injector = TestInjector(QuillDbContextModule)
   val repo = injector.instance[HolidayRepo]
-  val service = injector.instance[HolidayService]
 
   override def beforeEach(): Unit = {
     repo.deleteAll.value
