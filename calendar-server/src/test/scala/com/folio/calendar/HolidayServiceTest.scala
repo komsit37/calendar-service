@@ -41,6 +41,22 @@ val injector = TestInjector(QuillDbContextModule)
     res.head.note shouldBe None
   }
 
+  "insert and select filter calendar" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 19), None)).value
+    repo.insert(Holiday(Calendar.Japannext, LocalDate.of(2017, 2, 16), None)).value
+    repo.insert(Holiday(Calendar.Nasdaq, LocalDate.of(2017, 2, 17), None)).value
+    val res = service.getHolidays(Calendar.Jpx, None).value
+    info(res.toString)
+    res should have length 2
+    res.head.calendar shouldBe Calendar.Jpx
+    res.head.date shouldBe LocalDate.of(2017,2,14)
+    res.head.note shouldBe None
+    res(1).calendar shouldBe Calendar.Jpx
+    res(1).date shouldBe LocalDate.of(2017,2,19)
+    res(1).note shouldBe None
+  }
+
   "insert and delete" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
     service.deleteAllHolidays
@@ -48,6 +64,8 @@ val injector = TestInjector(QuillDbContextModule)
     info(res.toString)
     res should have length 0
   }
+
+
   //convenient implicit to add .value to Future type instead of calling Await.result
   implicit class RichFuture[T](future: Future[T]) {
     def value: T = {
