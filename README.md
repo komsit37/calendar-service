@@ -28,6 +28,12 @@ to run server
 ```
 sbt "calendar-server/run"
 ```
+
+to run server with auto reload when files are changed
+```
+sbt "~calendar-server/re-start"
+```
+
 You can see sample data on http://localhost:9910/holidays or run ThriftClientExample (below) to call thrift API
 
 to run test client
