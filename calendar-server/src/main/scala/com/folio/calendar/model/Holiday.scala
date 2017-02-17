@@ -38,4 +38,8 @@ class HolidayRepo @Inject()(val ctx: FinagleMysqlContext[Literal]){
   def deleteAll = ctx.run(quote{
     query[Holiday].delete
   })
+
+  def deleteOne(calendar: Calendar, date: LocalDate) = ctx.run(quote{
+    query[Holiday].filter(x => x.calendar == lift(calendar) && x.date == lift(date)).delete
+  })
 }
