@@ -9,7 +9,7 @@ import com.folio.calendar.service.HolidayService
 import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.response.Mustache
-
+import com.twitter.util.{Await, Future}
 
 @Mustache("holidays")
 case class HolidayListView(
@@ -22,16 +22,21 @@ class CalendarAdminHttpController @Inject()(
 
   get("/holidays") {request: Request =>
 //    holidayService.getHolidays(Calendar.Jpx)
-    //return dummy data for now
-    HolidayListView(Seq(
-      Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), Some("valentine's day")),
-      Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 15))
-    ))
+    val holidays = holidayService.getHolidays(Calendar.Jpx).value
+
+    HolidayListView(holidays)
   }
 
   get("/:*") { request: Request =>
     response.ok.fileOrIndex(
       filePath = request.params("*"),
       indexPath = "index.html")
+  }
+
+  //convenient implicit to add .value to Future type instead of calling Await.result
+  implicit class RichFuture[T](future: Future[T]) {
+    def value: T = {
+      Await.result(future)
+    }
   }
 }
