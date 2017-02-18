@@ -22,9 +22,8 @@ class CalendarAdminHttpController @Inject()(
 
   get("/holidays") {request: Request =>
 //    holidayService.getHolidays(Calendar.Jpx)
-    val holidays = holidayService.getHolidays(Calendar.Jpx).value
+    holidayService.getHolidays(Calendar.Jpx).map(holidays=>HolidayListView(holidays))
 
-    HolidayListView(holidays)
   }
 
   get("/:*") { request: Request =>
@@ -33,10 +32,4 @@ class CalendarAdminHttpController @Inject()(
       indexPath = "index.html")
   }
 
-  //convenient implicit to add .value to Future type instead of calling Await.result
-  implicit class RichFuture[T](future: Future[T]) {
-    def value: T = {
-      Await.result(future)
-    }
-  }
 }
