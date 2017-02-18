@@ -9,12 +9,11 @@ import com.twitter.util.{Await, Future}
 
 @Inject
 class HolidayService @Inject()(holidayRepo: HolidayRepo) {
-  def findNextPrevBusinessDay(calendar: Calendar, date: LocalDate, inc: Int): LocalDate = {
-    if (isBusinessDay(calendar, date).value) {
-      date
-    } else {
-        findNextPrevBusinessDay(calendar, date.plusDays(inc), inc)
-    }
+  def findNextPrevBusinessDay(calendar: Calendar, date: LocalDate, inc: Int): Future[LocalDate]  = {
+    isBusinessDay(calendar, date).flatMap(b => {
+       if(b) Future(date)
+       else findNextPrevBusinessDay(calendar, date.plusDays(inc), inc)
+    })
   }
 
   //should give a sensible default
@@ -31,11 +30,11 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
   def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = holidayRepo.delete(calendar, date).map(numDelete => numDelete > 0)
 
   def getNextBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] = {
-    Future(findNextPrevBusinessDay(calendar, date, 1))
+    findNextPrevBusinessDay(calendar, date, 1)
   }
 
   def getPreviousBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] = {
-    Future(findNextPrevBusinessDay(calendar, date, -1))
+    findNextPrevBusinessDay(calendar, date, -1)
   }
 
   def isTodayBusinessDay(calendar: Calendar): Future[Boolean] = {
