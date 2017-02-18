@@ -96,6 +96,13 @@ val injector = TestInjector(QuillDbContextModule)
     res.head.date shouldBe LocalDate.of(2017,2,14)
     res.head.note shouldBe None
   }
+  "check is weekend" in {
+    service.isWeekend(LocalDate.of(2017,2,13)) shouldBe false
+    // Saturday
+    service.isWeekend(LocalDate.of(2017,2,18)) shouldBe true
+    // Sunday
+    service.isWeekend(LocalDate.of(2017,2,19)) shouldBe true
+  }
   "insert and check is holiday" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
 

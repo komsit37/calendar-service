@@ -1,6 +1,6 @@
 package com.folio.calendar.service
 
-import java.time.LocalDate
+import java.time.{DayOfWeek, LocalDate}
 import javax.inject.Inject
 
 import com.folio.calendar.idl.Calendar
@@ -35,8 +35,9 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo){
     holidayRepo.deleteAll.map(_ => true)
   }
   def isHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = {
-    ???
-    holidayRepo.deleteAll.map(_ => true)
+    holidayRepo.selectOne(calendar, date).map(result => result.length > 0 || isWeekend(date) )
   }
+
+  def isWeekend(date: LocalDate):Boolean = date.getDayOfWeek() == DayOfWeek.SUNDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY
 
 }

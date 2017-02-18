@@ -46,10 +46,18 @@ val injector = TestInjector(QuillDbContextModule)
     res2 should have length 0
   }
 
-  "insert and delete one same calendar" in {}
-
-  "insert and delete one different calendar" in {}
-  //add more repo tests here
+  "insert and select one" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
+    // Select that date that do not have in DB
+    val res = repo.selectOne(Calendar.Jpx, LocalDate.of(2016, 1, 1)).value
+    res should have length 0
+    // Select that date that have in DB
+    val res2 = repo.selectOne(Calendar.Jpx, LocalDate.of(2016, 2, 14)).value
+    res2 should have length 1
+    res2.head.calendar shouldBe Calendar.Jpx
+    res2.head.date shouldBe LocalDate.of(2016,2,14)
+    res2.head.note shouldBe None
+  }
 
   //to add .value method to future
   implicit class RichFuture[T](future: Future[T]) {
