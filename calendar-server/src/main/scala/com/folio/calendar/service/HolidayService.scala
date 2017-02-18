@@ -28,7 +28,7 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
   //add business logic to db query result
   def deleteAllHolidays: Future[Boolean] = holidayRepo.deleteAll.map(_ => true)
 
-  def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = holidayRepo.delete(calendar, date).map(_ => true)
+  def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = holidayRepo.delete(calendar, date).map(numDelete => numDelete > 0)
 
   def getNextBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] = {
     Future(findNextPrevBusinessDay(calendar, date, 1))
