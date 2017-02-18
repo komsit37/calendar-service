@@ -22,14 +22,22 @@ class CalendarController @Inject()(holidayService: HolidayService)
   def toIdl(d: Holiday): idl.Holiday = idl.Holiday(d.calendar, serializeDate(d.date), d.note)
 
   // Since holidays are the inverse of business days, return the next non-holiday
-  override val getNextBusinessDay = handle(GetNextBusinessDay) { args: GetNextBusinessDay.Args => ???}
+  override val getNextBusinessDay = handle(GetNextBusinessDay) { args: GetNextBusinessDay.Args =>
+    holidayService.getNextBusinessDay(args.calendar, parseDate(args.date)).map(x => serializeDate(x))
+  }
 
-  override val isTodayBusinessDay = handle(IsTodayBusinessDay) { args: IsTodayBusinessDay.Args => ???}
+  override val isTodayBusinessDay = handle(IsTodayBusinessDay) { args: IsTodayBusinessDay.Args =>
+    holidayService.isTodayBusinessDay(args.calendar)
+  }
 
-  override val isBusinessDay = handle(IsBusinessDay) { args: IsBusinessDay.Args => ???}
+  override val isBusinessDay = handle(IsBusinessDay) { args: IsBusinessDay.Args =>
+    holidayService.isBusinessDay(args.calendar,  parseDate(args.date))
+  }
 
   // Return true if the day is marked as holiday in db OR is a weekend
-  override val isHoliday = handle(IsHoliday) { args: IsHoliday.Args => ???}
+  override val isHoliday = handle(IsHoliday) { args: IsHoliday.Args =>
+    holidayService.isHoliday(args.calendar,  parseDate(args.date))
+  }
 
   override val insertHoliday = handle(InsertHoliday) { args: InsertHoliday.Args =>
     holidayService.insertHoliday(fromIdl(args.holiday))
@@ -39,6 +47,10 @@ class CalendarController @Inject()(holidayService: HolidayService)
     holidayService.getHolidays(args.calendar, args.fromDate.map(parseDate)).map(_.map(x => toIdl(x)))
   }
 
-  override def getPreviousBusinessDay = handle(GetPreviousBusinessDay) { args: GetPreviousBusinessDay.Args => ???}
-  override def deleteHoliday = handle(DeleteHoliday) { args: DeleteHoliday.Args => ???}
+  override def getPreviousBusinessDay = handle(GetPreviousBusinessDay) { args: GetPreviousBusinessDay.Args =>
+    holidayService.getPreviousBusinessDay(args.calendar, parseDate(args.date)).map(x => serializeDate(x))
+  }
+  override def deleteHoliday = handle(DeleteHoliday) { args: DeleteHoliday.Args =>
+    holidayService.deleteHoliday(args.calendar,  parseDate(args.date))
+  }
 }
