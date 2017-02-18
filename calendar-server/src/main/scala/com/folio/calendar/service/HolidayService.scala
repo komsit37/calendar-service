@@ -1,6 +1,6 @@
 package com.folio.calendar.service
 
-import java.time.{DayOfWeek, LocalDate}
+import java.time.{DayOfWeek, LocalDate, ZoneId}
 import javax.inject.Inject
 
 import com.folio.calendar.idl.Calendar
@@ -27,8 +27,7 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo){
     Future (LocalDate.of(2017, 1, 1))
   }
   def isTodayBusinessDay(calendar: Calendar): Future[Boolean] = {
-    ???
-    holidayRepo.deleteAll.map(_ => true)
+    isHoliday(calendar,LocalDate.now(ZoneId.of("JST", ZoneId.SHORT_IDS))).map(x => !x)
   }
   def isBusinessDay(calendar: Calendar, date: LocalDate): Future[Boolean] = {
     isHoliday(calendar,date).map(x => !x)
