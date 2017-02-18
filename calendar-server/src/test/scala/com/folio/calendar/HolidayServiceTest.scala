@@ -59,7 +59,7 @@ val injector = TestInjector(QuillDbContextModule)
 
   "insert and delete" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
-    service.deleteAllHolidays
+    service.deleteAllHolidays.value
     val res = service.getHolidays(Calendar.Jpx).value
     info(res.toString)
     res should have length 0
