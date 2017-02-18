@@ -65,20 +65,26 @@ val injector = TestInjector(QuillDbContextModule)
     res should have length 0
   }
 
-  "insert and delete one same calendar" in {
+  "insert and delete one same calendar available date" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
+
+
+
+    service.deleteHoliday(Calendar.Jpx, LocalDate.of(2017, 2, 14))
+    val res = service.getHolidays(Calendar.Jpx).value
+    info(res.toString)
+    res should have length 0
+  }
+
+  "insert and delete one same calendar not available date" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
 
     service.deleteHoliday(Calendar.Jpx, LocalDate.of(2017, 2, 15))
-    val res1 = service.getHolidays(Calendar.Jpx).value
-    info(res1.toString)
-    res1 should have length 1
-    res1.head.date shouldBe LocalDate.of(2017,2,14)
-    res1.head.note shouldBe None
-
-    service.deleteHoliday(Calendar.Jpx, LocalDate.of(2017, 2, 14))
-    val res2 = service.getHolidays(Calendar.Jpx).value
-    info(res2.toString)
-    res2 should have length 0
+    val res = service.getHolidays(Calendar.Jpx).value
+    info(res.toString)
+    res should have length 1
+    res.head.date shouldBe LocalDate.of(2017,2,14)
+    res.head.note shouldBe None
   }
 
   "insert and delete one different calendar" in {
