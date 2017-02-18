@@ -13,12 +13,7 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
     if (isBusinessDay(calendar, date).value) {
       date
     } else {
-      if(inc > 0){
         findNextPrevBusinessDay(calendar, date.plusDays(inc), inc)
-      }else{
-        findNextPrevBusinessDay(calendar, date.minusDays(inc), inc)
-      }
-
     }
   }
 
