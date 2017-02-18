@@ -96,7 +96,112 @@ val injector = TestInjector(QuillDbContextModule)
     res.head.date shouldBe LocalDate.of(2017,2,14)
     res.head.note shouldBe None
   }
+  "insert and check is holiday" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
 
+    var res = service.isHoliday(Calendar.Jpx, LocalDate.of(2017,2,13)).value
+    res shouldBe false
+    // Holiday case
+    var res2 = service.isHoliday(Calendar.Jpx, LocalDate.of(2017,2,14)).value
+    res2 shouldBe true
+    // Weekend case
+    var res3 = service.isHoliday(Calendar.Jpx, LocalDate.of(2017,2,18)).value
+    res3 shouldBe true
+  }
+
+  "insert and check is business day" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
+
+    var res = service.isBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,13)).value
+    res shouldBe true
+    // Holiday case
+    var res2 = service.isBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,14)).value
+    res2 shouldBe false
+    // Weekend case
+    var res3 = service.isBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,18)).value
+    res3 shouldBe false
+  }
+
+  "insert and get next business day without holiday" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
+    //
+    val res = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,13)).value
+    res shouldBe LocalDate.of(2017,2,13)
+
+    val res2 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,14)).value
+    res2 shouldBe LocalDate.of(2017,2,15)
+
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 15), None)).value
+
+    val res3 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,14)).value
+    res3 shouldBe LocalDate.of(2017,2,16)
+
+
+  }
+
+  "insert and get next business day with holiday" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 17), None)).value
+    //
+    val res = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,16)).value
+    res shouldBe LocalDate.of(2017,2,16)
+
+    val res2 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,17)).value
+    res2 shouldBe LocalDate.of(2017,2,20)
+
+    val res3 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,18)).value
+    res3 shouldBe LocalDate.of(2017,2,20)
+
+    val res4 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,19)).value
+    res4 shouldBe LocalDate.of(2017,2,20)
+
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 20), None)).value
+    val res5 = service.getNextBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,17)).value
+    res5 shouldBe LocalDate.of(2017,2,21)
+  }
+
+  "insert and get previous business day without holiday" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 14), None)).value
+    //
+    val res = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,15)).value
+    res shouldBe LocalDate.of(2017,2,15)
+
+    val res2 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,14)).value
+    res2 shouldBe LocalDate.of(2017,2,13)
+
+    // Handle 2 consucutive holidays
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 15), None)).value
+
+    val res3 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,15)).value
+    res3 shouldBe LocalDate.of(2017,2,13)
+
+
+  }
+
+  "insert and get previous business day with holiday" in {
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 17), None)).value
+    //
+    val res = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,20)).value
+    res shouldBe LocalDate.of(2017,2,20)
+
+    val res2 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,19)).value
+    res2 shouldBe LocalDate.of(2017,2,16)
+
+    val res3 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,18)).value
+    res3 shouldBe LocalDate.of(2017,2,16)
+
+    val res4 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,17)).value
+    res4 shouldBe LocalDate.of(2017,2,16)
+
+    // Handle 2 consucutive holidays
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 16), None)).value
+    val res5 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,19)).value
+    res5 shouldBe LocalDate.of(2017,2,15)
+
+    // Handle holiday -> weekend -> holiday
+    repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2017, 2, 20), None)).value
+    val res6 = service.getPreviousBusinessDay(Calendar.Jpx, LocalDate.of(2017,2,20)).value
+    res6 shouldBe LocalDate.of(2017,2,15)
+  }
   //convenient implicit to add .value to Future type instead of calling Await.result
   implicit class RichFuture[T](future: Future[T]) {
     def value: T = {
