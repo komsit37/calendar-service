@@ -31,8 +31,7 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo){
     holidayRepo.deleteAll.map(_ => true)
   }
   def isBusinessDay(calendar: Calendar, date: LocalDate): Future[Boolean] = {
-    ???
-    holidayRepo.deleteAll.map(_ => true)
+    isHoliday(calendar,date).map(x => !x)
   }
   def isHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = {
     holidayRepo.selectOne(calendar, date).map(result => result.length > 0 || isWeekend(date) )
