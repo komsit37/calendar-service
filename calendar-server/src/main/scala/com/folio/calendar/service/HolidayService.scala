@@ -18,10 +18,25 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo){
   def deleteAllHolidays: Future[Boolean] = holidayRepo.deleteAll.map(_ => true)
   def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = holidayRepo.delete(calendar,date).map(_ => true)
 
-  def getNextBusinessDay(calendar: Calendar, date: LocalDate) =  LocalDate.of(2017, 1, 1)
-  def getPreviousBusinessDay(calendar: Calendar, date: LocalDate) =  LocalDate.of(2017, 1, 1)
-  def isTodayBusinessDay(calendar: Calendar) = true
-  def isBusinessDay(calendar: Calendar, date: LocalDate) = true
-  def isHoliday(calendar: Calendar, date: LocalDate) = true
+  def getNextBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] =   {
+    ???
+    Future (LocalDate.of(2017, 1, 1))
+  }
+  def getPreviousBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate]  =  {
+    ???
+    Future (LocalDate.of(2017, 1, 1))
+  }
+  def isTodayBusinessDay(calendar: Calendar): Future[Boolean] = {
+    ???
+    holidayRepo.deleteAll.map(_ => true)
+  }
+  def isBusinessDay(calendar: Calendar, date: LocalDate): Future[Boolean] = {
+    ???
+    holidayRepo.deleteAll.map(_ => true)
+  }
+  def isHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = {
+    ???
+    holidayRepo.deleteAll.map(_ => true)
+  }
 
 }
