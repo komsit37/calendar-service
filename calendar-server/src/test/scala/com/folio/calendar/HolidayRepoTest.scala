@@ -29,7 +29,15 @@ val injector = TestInjector(QuillDbContextModule)
     res.head.date shouldBe LocalDate.of(2016,2,14)
     res.head.note shouldBe None
   }
+  "insert and select from" in {}
 
+  "insert and select filter calendar" in {}
+
+  "insert and delete" in {}
+
+  "insert and delete one same calendar" in {}
+
+  "insert and delete one different calendar" in {}
   //add more repo tests here
 
   //to add .value method to future
