@@ -1,20 +1,71 @@
 <html>
+<body>
+{{#errorMsg}}
+    <div style="color:red;">
+        {{errorMsg}}
+    </div>
+{{/errorMsg}}
+<h1>Holiday List</h1>
+<div>
+    Chooose Calendar :
+    <form action="/holidays" method="GET">
+        <select id="choose-calendar" name="calendarId" onchange="this.form.submit()">
+            {{#calendars}}
+                <option value="{{value}}">{{originalName}}</option>
+            {{/calendars}}
+        </select>
+    </form>
+</div>
 <table>
-<thead>
-<tr>
-<th>Calendar</th>
-<th>Date</th>
-<th>Note</th>
-</tr>
-</thead>
-<tbody>
-{{#holidays}}
+    <thead>
     <tr>
-        <td>{{calendar}}</td>
-        <td>{{date}}</td>
-        <td>{{note}}</td>
+        <th>Calendar</th>
+        <th>Date</th>
+        <th>Note</th>
+        <th>Delete?</th>
     </tr>
-{{/holidays}}
-</tbody>
+    </thead>
+    <tbody>
+    {{#holidays}}
+        <tr>
+            <td>{{calendar}}</td>
+            <td>{{date}}</td>
+            <td>{{note}}</td>
+            <td>
+                <form action="/holiday" method="POST">
+                    <input type="hidden" name="t" value="delete">
+                    <input type="hidden" name="calendar" value="{{calendarId}}">
+                    <input type="hidden" name="date" value="{{date}}">
+                    <input type="submit" value="Delete">
+                </form>
+            </td>
+        </tr>
+    {{/holidays}}
+    </tbody>
 </table>
+<h1>Insert new holiday</h1>
+<div id="form-insert">
+    <form action="/holiday" method="POST">
+        <div>
+            Date : <input type="text" name="date" placeholder="2017-02-14" size="10">
+        </div>
+        <div>
+            Note : <textarea name="note"></textarea>
+        </div>
+        <input type="hidden" name="t" value="insert">
+        <input id="current-calendar" type="hidden" name="calendar" value="{{calendarId}}">
+        <div>
+            <input type="submit" value="Submit">
+        </div>
+
+    </form>
+</div>
+<script type="text/javascript">
+        function setCurrentCalendarId() {
+            document.getElementById("choose-calendar").value = document.getElementById("current-calendar").value;
+        }
+        window.onload = setCurrentCalendarId;
+
+</script>
+</body>
 </html>
