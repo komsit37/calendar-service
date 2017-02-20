@@ -3,7 +3,8 @@ package com.folio.calendar
 import java.time.LocalDate
 
 import com.folio.calendar.idl.{Calendar, CalendarService}
-import com.folio.calendar.model.HolidayRepo
+import com.folio.calendar.model.{Holiday, HolidayRepo}
+import com.folio.calendar.service.HolidayService
 import com.twitter.finagle.http.Status
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.finatra.thrift.ThriftClient
@@ -57,6 +58,32 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
         path = "/holidays",
         andExpect = Status.Ok
       )
+    }
+    "insert holidays" in {
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=insert",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value should contain
+      Holiday(Calendar.Jpx, LocalDate.parse(NextMon), Some("xxx"))
+    }
+    "delete holidays" in {
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=insert",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value should contain
+      Holiday(Calendar.Jpx, LocalDate.parse(NextMon), Some("xxx"))
+
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=delete",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value shouldBe empty
     }
   }
 }
