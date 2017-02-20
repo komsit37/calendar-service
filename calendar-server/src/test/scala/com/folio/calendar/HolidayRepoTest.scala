@@ -30,6 +30,16 @@ val injector = TestInjector(QuillDbContextModule)
     res.head.note shouldBe None
   }
 
+  "inserting duplicate Holiday" should {
+    "throw Exception" in {
+      pending
+      repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
+
+      //assert exception here - I think if you add primary key to db, insert will throw some mysql error
+      //repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
+    }
+  }
+
   "insert and delete" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
     repo.insert(Holiday(Calendar.Nasdaq, LocalDate.of(2016, 2, 14), None)).value
