@@ -18,11 +18,10 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
     disableTestLogging = true
   ) with ThriftClient
 
-  val repo = injector.instance[HolidayRepo]
   val client = server.thriftClient[CalendarService[Future]]()
 
   override def beforeEach(): Unit = {
-    repo.deleteAll.value
+    injector.instance[HolidayRepo].deleteAll.value
   }
 
   val Fri = "2017-02-17"
