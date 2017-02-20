@@ -24,11 +24,11 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
     injector.instance[HolidayRepo].deleteAll.value
   }
 
-  val Fri = "2017-02-17"
-  val Sat = "2017-02-18"
-  val Sun = "2017-02-19"
-  val NextMon = "2017-02-20"
-  val NextTue = "2017-02-21"
+  val Fri = "2017-02-10"
+  val Sat = "2017-02-11"
+  val Sun = "2017-02-12"
+  val NextMon = "2017-02-13"
+  val NextTue = "2017-02-14"
 
   "thrift" should {
     "getHolidays" in {
@@ -36,6 +36,15 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
       client.insertHoliday(d).value
       val res = client.getHolidays(Calendar.Jpx).value
       res should contain(d)
+    }
+    "getHolidays filter by from/to" in {
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Fri)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Sat)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Sun)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextTue)).value
+      val res = client.getHolidays(Calendar.Jpx, fromDate = Some(Sat), toDate = Some(NextMon)).value
+      res should contain only (Sat, Sun, NextMon)
     }
     "getNextBusinessDay" in {
       client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value

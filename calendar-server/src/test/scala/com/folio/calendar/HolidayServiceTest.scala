@@ -50,11 +50,28 @@ class HolidayServiceTest extends WordSpec with Matchers with BeforeAndAfterEach 
       val res = service.getHolidays(Calendar.Jpx).value
       res should contain only Holiday(Calendar.Jpx, Mon)
     }
-    "return holidays after from date" in {
-      service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
-      service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
-      val res = service.getHolidays(Calendar.Jpx, Some(Tue)).value
-      res should contain only Holiday(Calendar.Jpx, Wed)
+    "filter by from/to date" should {
+      "return holidays after from date" in {
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Tue)).value
+        res should contain only Holiday(Calendar.Jpx, Wed)
+      }
+      "from date should be inclusive" in {
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Mon)).value
+        res should contain only Holiday(Calendar.Jpx, Mon)
+      }
+
+      "return holidays before to date" in {
+        pending //no api yet
+      }
+      "to date should be inclusive" in {
+        pending //no api yet
+      }
+      "return holidays between from/to date" in {
+        pending //no api yet
+      }
     }
     "return only holidays for Jpx calendar" in {
       service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
