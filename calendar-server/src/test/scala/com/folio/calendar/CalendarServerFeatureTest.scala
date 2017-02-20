@@ -1,7 +1,10 @@
 package com.folio.calendar
 
+import java.time.LocalDate
+
 import com.folio.calendar.idl.{Calendar, CalendarService}
-import com.folio.calendar.model.HolidayRepo
+import com.folio.calendar.model.{Holiday, HolidayRepo}
+import com.folio.calendar.service.HolidayService
 import com.twitter.finagle.http.Status
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.finatra.thrift.ThriftClient
@@ -15,19 +18,45 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
     disableTestLogging = true
   ) with ThriftClient
 
-  val repo = injector.instance[HolidayRepo]
   val client = server.thriftClient[CalendarService[Future]]()
 
   override def beforeEach(): Unit = {
-    repo.deleteAll.value
+    injector.instance[HolidayRepo].deleteAll.value
   }
 
+  val Fri = "2017-02-10"
+  val Sat = "2017-02-11"
+  val Sun = "2017-02-12"
+  val NextMon = "2017-02-13"
+  val NextTue = "2017-02-14"
+
   "thrift" should {
-    "insert and get holiday" in {
-      val d = idl.Holiday(Calendar.Jpx, "2017-02-14", None)
+    "getHolidays" in {
+      val d = idl.Holiday(Calendar.Jpx, Fri, Some("note"))
       client.insertHoliday(d).value
       val res = client.getHolidays(Calendar.Jpx).value
       res should contain(d)
+    }
+    "getHolidays filter by from/to" in {
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Fri)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Sat)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, Sun)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextTue)).value
+      val res = client.getHolidays(Calendar.Jpx, fromDate = Some(Sat), toDate = Some(NextMon)).value
+      res should contain only (Sat, Sun, NextMon)
+    }
+    "getNextBusinessDay" in {
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value
+      client.getNextBusinessDay(Calendar.Jpx, Sat).value shouldBe NextTue
+      client.getNextBusinessDay(Calendar.Jpx, Sun).value shouldBe NextTue
+      client.getNextBusinessDay(Calendar.Jpx, NextMon).value shouldBe NextTue
+    }
+    "getPreviousBusinessDay" in {
+      client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value
+      client.getPreviousBusinessDay(Calendar.Jpx, NextMon).value shouldBe Fri
+      client.getPreviousBusinessDay(Calendar.Jpx, Sun).value shouldBe Fri
+      client.getPreviousBusinessDay(Calendar.Jpx, Sat).value shouldBe Fri
     }
   }
 
@@ -37,6 +66,32 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
         path = "/holidays",
         andExpect = Status.Ok
       )
+    }
+    "insert holidays" in {
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=insert",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value should contain
+      Holiday(Calendar.Jpx, LocalDate.parse(NextMon), Some("xxx"))
+    }
+    "delete holidays" in {
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=insert",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value should contain
+      Holiday(Calendar.Jpx, LocalDate.parse(NextMon), Some("xxx"))
+
+      server.httpPost(
+        path = s"/holiday?calendar=0&date=$NextMon&note=xxx&t=delete",
+        postBody = "",
+        andExpect = Status.Ok
+      )
+
+      injector.instance[HolidayService].getHolidays(Calendar.Jpx).value shouldBe empty
     }
   }
 }
