@@ -44,7 +44,7 @@ class CalendarServerFeatureTest extends FeatureTest with BeforeAndAfterEach {
       client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value
       client.insertHoliday(idl.Holiday(Calendar.Jpx, NextTue)).value
       val res = client.getHolidays(Calendar.Jpx, fromDate = Some(Sat), toDate = Some(NextMon)).value
-      res should contain only (Sat, Sun, NextMon)
+      res.map(_.date) should contain only (Sat, Sun, NextMon)
     }
     "getNextBusinessDay" in {
       client.insertHoliday(idl.Holiday(Calendar.Jpx, NextMon)).value

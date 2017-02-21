@@ -6,6 +6,7 @@ import com.folio.calendar.idl.Calendar
 import com.folio.calendar.model.{Holiday, HolidayRepo}
 import com.folio.calendar.module.QuillDbContextModule
 import com.folio.calendar.service.HolidayService
+import com.twitter.finagle.mysql.ServerError
 import com.twitter.inject.app.TestInjector
 import com.twitter.util.{Await, Future}
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
@@ -38,7 +39,7 @@ class HolidayServiceTest extends WordSpec with Matchers with BeforeAndAfterEach 
     "not insert duplicate holiday" in {
       val d = Holiday(Calendar.Jpx, Mon)
       service.insertHoliday(d).value
-      service.insertHoliday(d).value
+      try service.insertHoliday(d).value catch{case e : ServerError => info("Duplicate calendar")}
       val res = service.getHolidays(Calendar.Jpx).value
       res shouldBe Seq(d)
     }
@@ -64,13 +65,27 @@ class HolidayServiceTest extends WordSpec with Matchers with BeforeAndAfterEach 
       }
 
       "return holidays before to date" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Mon), Some(Tue)).value
+        res should contain only (Holiday(Calendar.Jpx, Mon), Holiday(Calendar.Jpx, Tue))
       }
       "to date should be inclusive" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Mon), Some(Tue)).value
+        res should contain only (Holiday(Calendar.Jpx, Mon), Holiday(Calendar.Jpx, Tue))
       }
       "return holidays between from/to date" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, NextMon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, NextTue)).value
+
+        val res = service.getHolidays(Calendar.Jpx, Some(Tue), Some(NextMon)).value
+        res should contain only (Holiday(Calendar.Jpx, Tue), Holiday(Calendar.Jpx, Wed),Holiday(Calendar.Jpx, NextMon))
       }
     }
     "return only holidays for Jpx calendar" in {

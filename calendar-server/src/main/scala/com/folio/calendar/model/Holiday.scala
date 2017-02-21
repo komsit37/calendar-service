@@ -31,8 +31,8 @@ class HolidayRepo @Inject()(val ctx: FinagleMysqlContext[Literal]){
     query[Holiday].filter(x => x.calendar == lift(calendar) && x.date == lift(date)).take(1)
   })
 
-  def select(calendar: Calendar, from: LocalDate) = ctx.run(quote{
-    query[Holiday].filter(x => x.calendar == lift(calendar) && x.date > lift(from))
+  def select(calendar: Calendar, from: LocalDate, to: LocalDate) = ctx.run(quote{
+    query[Holiday].filter(x => x.calendar == lift(calendar) && x.date >= lift(from) && x.date <= lift(to))
   })
 
   def insert(holiday: Holiday) = ctx.run(quote{
