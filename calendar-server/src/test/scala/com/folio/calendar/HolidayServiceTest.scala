@@ -65,13 +65,27 @@ class HolidayServiceTest extends WordSpec with Matchers with BeforeAndAfterEach 
       }
 
       "return holidays before to date" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Mon), Some(Tue)).value
+        res should contain only (Holiday(Calendar.Jpx, Mon), Holiday(Calendar.Jpx, Tue))
       }
       "to date should be inclusive" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        val res = service.getHolidays(Calendar.Jpx, Some(Mon), Some(Tue)).value
+        res should contain only (Holiday(Calendar.Jpx, Mon), Holiday(Calendar.Jpx, Tue))
       }
       "return holidays between from/to date" in {
-        pending //no api yet
+        service.insertHoliday(Holiday(Calendar.Jpx, Mon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Tue)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, Wed)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, NextMon)).value
+        service.insertHoliday(Holiday(Calendar.Jpx, NextTue)).value
+
+        val res = service.getHolidays(Calendar.Jpx, Some(Tue), Some(NextMon)).value
+        res should contain only (Holiday(Calendar.Jpx, Tue), Holiday(Calendar.Jpx, Wed),Holiday(Calendar.Jpx, NextMon))
       }
     }
     "return only holidays for Jpx calendar" in {
