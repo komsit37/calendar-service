@@ -1,0 +1,1 @@
+ALTER TABLE `Holiday` ADD UNIQUE( `calendar`, `date`);
