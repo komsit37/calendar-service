@@ -6,6 +6,7 @@ import com.folio.calendar.idl.Calendar
 import com.folio.calendar.model.{Holiday, HolidayRepo}
 import com.folio.calendar.module.QuillDbContextModule
 import com.folio.calendar.service.HolidayService
+import com.twitter.finagle.mysql.ServerError
 import com.twitter.inject.app.TestInjector
 import com.twitter.util.{Await, Future}
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
@@ -38,7 +39,7 @@ class HolidayServiceTest extends WordSpec with Matchers with BeforeAndAfterEach 
     "not insert duplicate holiday" in {
       val d = Holiday(Calendar.Jpx, Mon)
       service.insertHoliday(d).value
-      service.insertHoliday(d).value
+      try service.insertHoliday(d).value catch{case e : ServerError => info("Duplicate calendar")}
       val res = service.getHolidays(Calendar.Jpx).value
       res shouldBe Seq(d)
     }
