@@ -1,5 +1,6 @@
 package com.folio.calendar.service
 
+import java.time.temporal.TemporalAdjusters
 import java.time.{DayOfWeek, LocalDate, ZoneId}
 import javax.inject.Inject
 
@@ -16,12 +17,12 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
     })
   }
 
-  //should give a sensible default
-  val defaultFrom = LocalDate.of(2017, 1, 1)
-  val defaultTo = LocalDate.of(2017, 12, 31)
+  //default from beginning of this year till end of next year
+  val BeginningOfThisYear = LocalDate.now.`with`(TemporalAdjusters.firstDayOfYear())
+  val EndOfNextYear = LocalDate.now.plusYears(1)`with`(TemporalAdjusters.lastDayOfYear())
 
   def getHolidays(calendar: Calendar, from: Option[LocalDate] = None, to: Option[LocalDate] = None): Future[Seq[Holiday]]
-  = holidayRepo.select(calendar, from.getOrElse(defaultFrom), to.getOrElse(defaultTo))
+  = holidayRepo.select(calendar, from.getOrElse(BeginningOfThisYear), to.getOrElse(EndOfNextYear))
 
   def insertHoliday(holiday: Holiday): Future[Boolean] = holidayRepo.insert(holiday).map(_ => true)
 
