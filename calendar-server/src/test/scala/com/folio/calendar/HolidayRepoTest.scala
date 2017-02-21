@@ -34,8 +34,9 @@ val injector = TestInjector(QuillDbContextModule)
     "throw Exception" in {
       repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
 
-      //assert exception here - I think if you add primary key to db, insert will throw some mysql error
-      //repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
+      //it's good to write test to show expected error from library, so we can handle it in service properly
+      val error = the[com.twitter.finagle.mysql.ServerError] thrownBy repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
+      error.code shouldBe 1062 //Duplicate entry 'PRIMARY'
     }
   }
 
