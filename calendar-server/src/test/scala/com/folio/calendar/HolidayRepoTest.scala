@@ -22,7 +22,7 @@ val injector = TestInjector(QuillDbContextModule)
   "insert and select" in {
     repo.insert(Holiday(Calendar.Jpx, LocalDate.of(2016, 2, 14), None)).value
     repo.insert(Holiday(Calendar.Nasdaq, LocalDate.of(2016, 2, 15), None)).value
-    val res = repo.select(Calendar.Jpx, LocalDate.of(2016, 1, 1)).value
+    val res = repo.select(Calendar.Jpx, LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)).value
     info(res.toString)
     res should have length 1
     res.head.calendar shouldBe Calendar.Jpx
@@ -46,13 +46,13 @@ val injector = TestInjector(QuillDbContextModule)
 
     repo.delete(Calendar.Nasdaq, LocalDate.of(2016, 2, 14)).value
 
-    val res = repo.select(Calendar.Jpx, LocalDate.of(2016, 1, 1)).value
+    val res = repo.select(Calendar.Jpx, LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)).value
     res should have length 1
     res.head.calendar shouldBe Calendar.Jpx
     res.head.date shouldBe LocalDate.of(2016,2,14)
     res.head.note shouldBe None
 
-    val res2 = repo.select(Calendar.Nasdaq, LocalDate.of(2016, 1, 1)).value
+    val res2 = repo.select(Calendar.Nasdaq, LocalDate.of(2016, 1, 1), LocalDate.of(2016, 12, 31)).value
     res2 should have length 0
   }
 

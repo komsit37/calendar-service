@@ -20,14 +20,16 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
   val defaultFrom = LocalDate.of(2017, 1, 1)
   val defaultTo = LocalDate.of(2017, 12, 31)
 
-  def getHolidays(calendar: Calendar, from: Option[LocalDate] = None): Future[Seq[Holiday]] = holidayRepo.select(calendar, from.getOrElse(defaultFrom))
+  def getHolidays(calendar: Calendar, from: Option[LocalDate] = None, to: Option[LocalDate] = None): Future[Seq[Holiday]]
+  = holidayRepo.select(calendar, from.getOrElse(defaultFrom), to.getOrElse(defaultTo))
 
   def insertHoliday(holiday: Holiday): Future[Boolean] = holidayRepo.insert(holiday).map(_ => true)
 
   //add business logic to db query result
   def deleteAllHolidays: Future[Boolean] = holidayRepo.deleteAll.map(_ => true)
 
-  def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = holidayRepo.delete(calendar, date).map(numDelete => numDelete > 0)
+  def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean]
+  = holidayRepo.delete(calendar, date).map(numDelete => numDelete > 0)
 
   def getNextBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] = {
     findNextPrevBusinessDay(calendar, date, 1)
