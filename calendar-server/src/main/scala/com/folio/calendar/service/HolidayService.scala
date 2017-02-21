@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 import com.folio.calendar.idl.Calendar
 import com.folio.calendar.model.{Holiday, HolidayRepo}
-import com.twitter.util.{Await, Future}
+import com.twitter.util.Future
 
 @Inject
 class HolidayService @Inject()(holidayRepo: HolidayRepo) {
@@ -30,7 +30,7 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
   def deleteAllHolidays: Future[Boolean] = holidayRepo.deleteAll.map(_ => true)
 
   def deleteHoliday(calendar: Calendar, date: LocalDate): Future[Boolean]
-  = holidayRepo.delete(calendar, date).map(numDelete => numDelete > 0)
+  = holidayRepo.delete(calendar, date).map(numDeleted => numDeleted > 0)
 
   def getNextBusinessDay(calendar: Calendar, date: LocalDate): Future[LocalDate] = {
     findNextPrevBusinessDay(calendar, date, 1)
@@ -49,16 +49,9 @@ class HolidayService @Inject()(holidayRepo: HolidayRepo) {
   }
 
   def isHoliday(calendar: Calendar, date: LocalDate): Future[Boolean] = {
-    holidayRepo.selectOne(calendar, date).map(result => result.length > 0 || isWeekend(date))
+    holidayRepo.selectOne(calendar, date).map(result => result.nonEmpty || isWeekend(date))
   }
 
   def isWeekend(date: LocalDate): Boolean = date.getDayOfWeek() == DayOfWeek.SUNDAY || date.getDayOfWeek() == DayOfWeek.SATURDAY
-
-  //to add .value method to future
-  implicit class RichFuture[T](future: Future[T]) {
-    def value: T = {
-      Await.result(future)
-    }
-  }
 
 }
