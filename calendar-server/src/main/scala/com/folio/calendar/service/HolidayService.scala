@@ -6,25 +6,38 @@ import javax.inject.Inject
 
 import com.folio.calendar.idl.Calendar
 import com.folio.calendar.model.{Holiday, HolidayRepo}
+import com.twitter.inject.Logging
 import com.twitter.util.Future
 
 @Inject
-class HolidayService @Inject()(holidayRepo: HolidayRepo) {
-  def findNextPrevBusinessDay(calendar: Calendar, date: LocalDate, inc: Int): Future[LocalDate]  = {
+class HolidayService @Inject()(holidayRepo: HolidayRepo) extends Logging {
+  val MySqlDuplicateEntryPrimaryErrorCode = 1062
+  def findNextPrevBusinessDay(calendar: Calendar, date: LocalDate, inc: Int): Future[LocalDate] = {
     isBusinessDay(calendar, date).flatMap(b => {
-       if(b) Future(date)
-       else findNextPrevBusinessDay(calendar, date.plusDays(inc), inc)
+      if (b) Future(date)
+      else findNextPrevBusinessDay(calendar, date.plusDays(inc), inc)
     })
   }
 
   //default from beginning of this year till end of next year
   val BeginningOfThisYear = LocalDate.now.`with`(TemporalAdjusters.firstDayOfYear())
-  val EndOfNextYear = LocalDate.now.plusYears(1)`with`(TemporalAdjusters.lastDayOfYear())
+  val EndOfNextYear = LocalDate.now.plusYears(1) `with` (TemporalAdjusters.lastDayOfYear())
 
   def getHolidays(calendar: Calendar, from: Option[LocalDate] = None, to: Option[LocalDate] = None): Future[Seq[Holiday]]
   = holidayRepo.select(calendar, from.getOrElse(BeginningOfThisYear), to.getOrElse(EndOfNextYear))
 
-  def insertHoliday(holiday: Holiday): Future[Boolean] = holidayRepo.insert(holiday).map(_ => true)
+  def insertHoliday(holiday: Holiday): Future[Boolean] = {
+    holidayRepo.insert(holiday)
+      .map(_ => true)
+      .rescue({
+        case e: com.twitter.finagle.mysql.ServerError => e.code match {
+          case MySqlDuplicateEntryPrimaryErrorCode =>
+            logger.warn(s"trying to insert duplicate $holiday. Duplicate entry will be ignored")
+            Future.value(false)
+          case _ => Future.exception(e)
+        }
+      })
+  }
 
   //add business logic to db query result
   def deleteAllHolidays: Future[Boolean] = holidayRepo.deleteAll.map(_ => true)
